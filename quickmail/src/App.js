@@ -1,14 +1,51 @@
-import React from "react"
-
+import React, { useEffect, useState } from "react"
 import "./App.css"
 
 function App(){
+    const [email, setEmail] = useState("")
+    const [receivedMails, setReceivedMails] = useState([])
+    useEffect(()=>{
+        let URL = "https://api.mail.tm"
+        let email = `QuickMail${Date.now()}@edny.net`
+        let password = "quickmail"
+        async function authenticateUser() {
+            try {
+                let authResponse = await fetch(`${API_BASE}/token`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ address: email, password: password }),
+                });
+
+                let authData = await authResponse.json();
+                if (!authData.token) throw new Error("Authentication failed");
+
+                token = authData.token;
+                setEmail()
+                fetchEmails();
+            } catch (error) {
+                console.error("Error authenticating:", error);
+            }
+        }
+        createEmail = async() =>{
+        try{
+            let accountResponse = await fetch(`${URL}/accounts`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ address: email, password: password }),
+            });
+
+            if (accountResponse.status !== 201) {setEmail("Failed to generate email"); return}
+            authenticateUser()
+        }catch(err){
+
+        }}
+    },[])
     return (
         <div id="webcrumbs">
             <div className="w-[100vw] h-[100vh] bg-gray-900 text-white p-6 flex flex-col">
                 <header className="mb-8">
                     <h1 className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-                        QuickMail
+                        {email ? email: "Generating..."}
                     </h1>
                 </header>
 
