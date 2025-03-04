@@ -2,98 +2,89 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
-    const [email, setEmail] = useState("");
-    const [receivedMails, setReceivedMails] = useState([]);
-    let password = "quickmail";
-    let API_BASE = "https://api.mail.tm";
+  const API_BASE = "https://api.mail.tm";
+  const [email, setEmail] = useState('');
+  const [emails, setEmails] = useState([]);
+  const [token, setToken] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    useEffect(() => {
-        async function getDomain() {
-            try {
-                let response = await fetch(`${API_BASE}/domains`);
-                let data = await response.json();
-                if (!data["hydra:member"].length) throw new Error("No domains available");
-                return data["hydra:member"][0].domain; // Use the first available domain
-            } catch (error) {
-                console.error("Error fetching domain:", error);
-                return null;
-            }
-        }
+useEffect(() => {
+  const createTempEmail = async () => {
+    try {
+      let domain = "indigobook.com";
+      let newEmail = `tempuser${Date.now()}@${domain}`;
+      let password = "TempPass123!";
 
-        async function authenticateUser(mail) {
-            console.log("Authenticating with:", mail, password);
-            try {
-                let authResponse = await fetch(`${API_BASE}/token`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: mail, password: password }),
-                });
+      let accountResponse = await fetch(`${API_BASE}/accounts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: newEmail, password: password }),
+      });
 
-                let authData = await authResponse.json();
-                console.log("Auth Response:", authData);
+      if (accountResponse.status !== 201) throw new Error("Failed to create account");
 
-                if (!authData.token) throw new Error("Authentication failed");
+      setEmail(newEmail);
+      authenticateUser(newEmail, password);
+    } catch (error) {
+      console.error("Error creating email:", error);
+    }
+  };
 
-                setEmail(mail); // ✅ Correctly set email
-                fetchEmails(authData.token);
-            } catch (error) {
-                console.error("Error authenticating:", error);
-            }
-        }
+  const authenticateUser = async (email, password) => {
+    try {
+      let authResponse = await fetch(`${API_BASE}/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: email, password: password }),
+      });
 
-        async function createEmail() {
-            let domain = await getDomain();
-            if (!domain) return;
+      let authData = await authResponse.json();
+      if (!authData.token) throw new Error("Authentication failed");
 
-            let generatedMail = `QuickMail${Date.now()}@${domain}`;
-            console.log("Generated email:", generatedMail);
+      setToken(authData.token);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error("Error authenticating:", error);
+    }
+  };
 
-            try {
-                let accountResponse = await fetch(`${API_BASE}/accounts`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: generatedMail, password: password }),
-                });
+  const fetchEmails = async () => {
+    if (!isAuthenticated) return;
 
-                let responseText = await accountResponse.text();
-                console.log("Account Creation Response:", responseText);
+    try {
+      let headers = { Authorization: `Bearer ${token}` };
 
-                authenticateUser(generatedMail); // ✅ Pass correct email
-            } catch (err) {
-                console.error("Error creating email:", err);
-            }
-        }
+      setInterval(async () => {
+        let messagesResponse = await fetch(`${API_BASE}/messages`, { headers });
+        let messagesData = await messagesResponse.json();
+        let messages = messagesData["hydra:member"];
 
-        async function fetchEmails(authToken) {
-            try {
-                let headers = { Authorization: `Bearer ${authToken}` };
+        // Append new messages to the list
+        setEmails((prevEmails) => {
+          return [
+            ...prevEmails,
+            ...messages.map((msg) => ({
+              id: msg.id,
+              from: msg.from.address,
+              subject: msg.subject,
+              intro: msg.intro,
+            })),
+          ];
+        });
+      }, 2000);
+    } catch (error) {
+      console.error("Error fetching emails:", error);
+    }
+  };
 
-                setInterval(async () => {
-                    let messagesResponse = await fetch(`${API_BASE}/messages`, { headers });
-                    let messagesData = await messagesResponse.json();
-                    let messages = messagesData["hydra:member"];
+  createTempEmail();
 
-                    let fetchedEmails = await Promise.all(
-                        messages.map(async (msg) => {
-                            let msgDetailsResponse = await fetch(`${API_BASE}/messages/${msg.id}`, { headers });
-                            let msgDetails = await msgDetailsResponse.json();
-                            return {
-                                from: msgDetails.from.address,
-                                subject: msgDetails.subject,
-                                intro: msgDetails.intro,
-                            };
-                        })
-                    );
+  return () => {
+    // Cleanup interval when the component is unmounted
+    clearInterval();
+  };
+}, [isAuthenticated, token]);
 
-                    setReceivedMails(fetchedEmails);
-                }, 5000);
-            } catch (error) {
-                console.error("Error fetching emails:", error);
-            }
-        }
-
-        createEmail();
-    }, []);
 
     return (
         <div id="webcrumbs">
