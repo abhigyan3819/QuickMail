@@ -20,23 +20,24 @@ function App() {
             }
         }
 
-        async function authenticateUser(Mail) {
-            console.log("Authenticating with:", Mail, password);
+        async function authenticateUser(mail) {
+            console.log("Authenticating with:", mail, password);
             try {
                 let authResponse = await fetch(`${API_BASE}/token`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: Mail, password: password }),
+                    body: JSON.stringify({ address: mail, password: password }),
                 });
-                console.log("fetched    ......")
+
                 let authData = await authResponse.json();
-                console.log(authData)
+                console.log("Auth Response:", authData);
+
                 if (!authData.token) throw new Error("Authentication failed");
 
-                setEmail(generatedMail);
+                setEmail(mail); // ✅ Correctly set email
                 fetchEmails(authData.token);
             } catch (error) {
-                console.log("Error authenticating:", error);
+                console.error("Error authenticating:", error);
             }
         }
 
@@ -45,15 +46,25 @@ function App() {
             if (!domain) return;
 
             let generatedMail = `QuickMail${Date.now()}@${domain}`;
+            console.log("Generated email:", generatedMail);
 
             try {
                 let accountResponse = await fetch(`${API_BASE}/accounts`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: generatedMail, password:password }),
+                    body: JSON.stringify({ address: generatedMail, password: password }),
                 });
-                console.log(await accountResponse.text())
-                authenticateUser(generatedMail);
+
+                let responseText = await accountResponse.text();
+                console.log("Account Creation Response:", responseText);
+
+                if (accountResponse.status !== 201) {
+                    console.error("Failed to create email:", responseText);
+                    setEmail("Failed to generate email");
+                    return;
+                }
+
+                authenticateUser(generatedMail); // ✅ Pass correct email
             } catch (err) {
                 console.error("Error creating email:", err);
             }
@@ -81,7 +92,7 @@ function App() {
                     );
 
                     setReceivedMails(fetchedEmails);
-                }, 2000);
+                }, 5000);
             } catch (error) {
                 console.error("Error fetching emails:", error);
             }
