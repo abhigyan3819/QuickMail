@@ -4,12 +4,23 @@ import "./App.css";
 function App() {
     const [email, setEmail] = useState("");
     const [receivedMails, setReceivedMails] = useState([]);
+    const [generatedEmail, setGeneratedEmail] = useState("")
+    let password = "quickmail"
 
     useEffect(() => {
         let API_BASE = "https://api.mail.tm";
-        let generatedEmail = `QuickMail${Date.now()}@edny.net`;
-        let password = "quickmail";
+        async function getDomain() {
+            try {
+                let domainsResponse = await fetch(`${API_BASE}/domains`);
+                let domainsData = await domainsResponse.json();
+                if (!domainsData["hydra:member"].length) throw new Error("No domains available");
 
+                return domainsData["hydra:member"][0].domain; // Use the first available domain
+            } catch (error) {
+                console.error("Error fetching domain:", error);
+                return null;
+            }
+        }
         async function authenticateUser() {
             try {
                 let authResponse = await fetch(`${API_BASE}/token`, {
@@ -29,6 +40,9 @@ function App() {
         }
 
         async function createEmail() {
+            let domain = await getDomain()
+            let generatedMail = `QuickMail${Date.now()}@${domain}`;
+            setGeneratedEmail(generatedMail)
             try {
                 let accountResponse = await fetch(`${API_BASE}/accounts`, {
                     method: "POST",
@@ -38,6 +52,7 @@ function App() {
 
                 if (accountResponse.status !== 201) {
                     setEmail("Failed to generate email");
+                    console.log(accountResponse)
                     return;
                 }
 
