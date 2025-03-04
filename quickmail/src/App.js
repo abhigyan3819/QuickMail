@@ -20,21 +20,23 @@ function App() {
             }
         }
 
-        async function authenticateUser(generatedMail) {
+        async function authenticateUser(Mail) {
+            console.log("Authenticating with:", Mail, password);
             try {
                 let authResponse = await fetch(`${API_BASE}/token`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: generatedMail, password }),
+                    body: JSON.stringify({ address: Mail, password: password }),
                 });
-
+                console.log("fetched    ......")
                 let authData = await authResponse.json();
+                console.log(authData)
                 if (!authData.token) throw new Error("Authentication failed");
 
                 setEmail(generatedMail);
                 fetchEmails(authData.token);
             } catch (error) {
-                console.error("Error authenticating:", error);
+                console.log("Error authenticating:", error);
             }
         }
 
@@ -48,16 +50,9 @@ function App() {
                 let accountResponse = await fetch(`${API_BASE}/accounts`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: generatedMail, password }),
+                    body: JSON.stringify({ address: generatedMail, password:password }),
                 });
-
-                if (accountResponse.status !== 201) {
-                    setEmail("Failed to generate email");
-                    console.log(await accountResponse.json());
-                    return;
-                }
-
-                // Authenticate with the newly created email
+                console.log(await accountResponse.text())
                 authenticateUser(generatedMail);
             } catch (err) {
                 console.error("Error creating email:", err);
