@@ -43,16 +43,17 @@ function App() {
             let domain = await getDomain()
             let generatedMail = `QuickMail${Date.now()}@${domain}`;
             setGeneratedEmail(generatedMail)
+            alert(generatedMail)
             try {
                 let accountResponse = await fetch(`${API_BASE}/accounts`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: generatedEmail, password: password }),
+                    body: JSON.stringify({ address: generatedMail, password: password }),
                 });
+                console.log(accountResponse)
 
                 if (accountResponse.status !== 201) {
                     setEmail("Failed to generate email");
-                    console.log(accountResponse)
                     return;
                 }
 
