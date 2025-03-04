@@ -5,7 +5,6 @@ function App() {
   const API_BASE = "https://api.mail.tm";
   const [email, setEmail] = useState('');
   const [emails, setEmails] = useState([]);
-  const [token, setToken] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 useEffect(() => {
@@ -41,29 +40,24 @@ useEffect(() => {
       let authData = await authResponse.json();
       if (!authData.token) throw new Error("Authentication failed");
 
-      setToken(authData.token);
       setIsAuthenticated(true);
-      fetchEmails()
+      fetchEmails(authData.token)
     } catch (error) {
       console.error("Error authenticating:", error);
     }
   };
 
-  const fetchEmails = async () => {
-
-    try {
+  const fetchEmails = async (token) => {
+      try {
       let headers = { Authorization: `Bearer ${token}` };
-
       setInterval(async () => {
-        console.log("fetching....")
         let messagesResponse = await fetch(`${API_BASE}/messages`, { headers });
         let messagesData = await messagesResponse.json();
         let messages = messagesData["hydra:member"];
-        console.log(messages)
+        console.log(headers)
         if(!messages)return
-        setEmails((prevEmails) => {
+        setEmails(() => {
           return [
-            ...prevEmails,
             ...messages.map((msg) => ({
               id: msg.id,
               from: msg.from.address,
