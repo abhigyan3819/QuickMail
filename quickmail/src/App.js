@@ -5,6 +5,7 @@ function App() {
   const API_BASE = "https://api.mail.tm";
   const [email, setEmail] = useState('');
   const [emails, setEmails] = useState([]);
+  const [selectedMail, setSelectedMail] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 useEffect(() => {
@@ -63,6 +64,8 @@ useEffect(() => {
               from: msg.from.address,
               subject: msg.subject,
               intro: msg.intro,
+              time: msg.createdAt,
+              content: msg.text || msg.html || ""
             })),
           ];
         });
@@ -143,7 +146,9 @@ useEffect(() => {
                     <h2 className="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Received Emails</h2>
                     <div className="space-y-3 overflow-y-auto h-[calc(100vh-230px)] pr-2 scrollbar-thin">
                         {emails.map((mail, index) => (
-                                <div key={index} className="p-4 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-750 transition-all duration-300 border border-gray-700 hover:border-blue-500 transform hover:-translate-y-1">
+                                <div key={index} onClick={()=>
+                                  setSelectedMail(mail)
+                                } className="p-4 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-750 transition-all duration-300 border border-gray-700 hover:border-blue-500 transform hover:-translate-y-1">
                                     <h3 className="font-medium text-blue-400">From: {mail.from}</h3>
                                     <p className="text-sm text-gray-300 truncate">Subject: {mail.subject}</p>
                                     <p className="text-sm text-gray-300 truncate">{mail.intro}</p>
@@ -151,25 +156,25 @@ useEffect(() => {
                             ))}
                     </div>
                 </div>
-
+                {selectedMail &&
                 <div className="w-3/5 bg-gray-800 rounded-lg p-5 border border-gray-700 flex flex-col">
                     <div className="border-b border-gray-700 pb-3 mb-4">
-                        <h2 className="text-xl font-semibold text-blue-400">Welcome to QuickMail Service</h2>
+                        <h2 className="text-xl font-semibold text-blue-400">{selectedMail.subject}</h2>
                         <div className="flex text-xs text-gray-400 mt-1">
                             <span>
-                                From: <span className="text-gray-300">support@quickmail.temp</span>
+                                From: <span className="text-gray-300">{selectedMail.from}</span>
                             </span>
                             <span className="mx-2">•</span>
-                            <span>Today, 11:23 AM</span>
+                            <span>{selectedMail.time}</span>
                         </div>
                     </div>
 
                     <div className="overflow-y-auto h-[calc(100vh-280px)] pr-2 scrollbar-thin">
                         <div className="text-gray-300 leading-relaxed">
-                            
+                            {selectedMail.content}
                         </div>
                     </div>
-                </div>
+                </div>}
             </div>
         </div>
     </div>
