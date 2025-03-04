@@ -4,35 +4,34 @@ import "./App.css";
 function App() {
     const [email, setEmail] = useState("");
     const [receivedMails, setReceivedMails] = useState([]);
-    const [generatedEmail, setGeneratedEmail] = useState("")
-    let password = "quickmail"
+    let password = "quickmail";
+    let API_BASE = "https://api.mail.tm";
 
     useEffect(() => {
-        let API_BASE = "https://api.mail.tm";
         async function getDomain() {
             try {
-                let domainsResponse = await fetch(`${API_BASE}/domains`);
-                let domainsData = await domainsResponse.json();
-                if (!domainsData["hydra:member"].length) throw new Error("No domains available");
-
-                return domainsData["hydra:member"][0].domain; // Use the first available domain
+                let response = await fetch(`${API_BASE}/domains`);
+                let data = await response.json();
+                if (!data["hydra:member"].length) throw new Error("No domains available");
+                return data["hydra:member"][0].domain; // Use the first available domain
             } catch (error) {
                 console.error("Error fetching domain:", error);
                 return null;
             }
         }
-        async function authenticateUser() {
+
+        async function authenticateUser(generatedMail) {
             try {
                 let authResponse = await fetch(`${API_BASE}/token`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: generatedEmail, password: password }),
+                    body: JSON.stringify({ address: generatedMail, password }),
                 });
 
                 let authData = await authResponse.json();
                 if (!authData.token) throw new Error("Authentication failed");
 
-                setEmail(generatedEmail);
+                setEmail(generatedMail);
                 fetchEmails(authData.token);
             } catch (error) {
                 console.error("Error authenticating:", error);
@@ -40,24 +39,26 @@ function App() {
         }
 
         async function createEmail() {
-            let domain = await getDomain()
+            let domain = await getDomain();
+            if (!domain) return;
+
             let generatedMail = `QuickMail${Date.now()}@${domain}`;
-            setGeneratedEmail(generatedMail)
-            alert(generatedMail)
+
             try {
                 let accountResponse = await fetch(`${API_BASE}/accounts`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: generatedMail, password: password }),
+                    body: JSON.stringify({ address: generatedMail, password }),
                 });
-                console.log(accountResponse)
 
                 if (accountResponse.status !== 201) {
                     setEmail("Failed to generate email");
+                    console.log(await accountResponse.json());
                     return;
                 }
 
-                authenticateUser();
+                // Authenticate with the newly created email
+                authenticateUser(generatedMail);
             } catch (err) {
                 console.error("Error creating email:", err);
             }
