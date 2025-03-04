@@ -43,23 +43,24 @@ useEffect(() => {
 
       setToken(authData.token);
       setIsAuthenticated(true);
+      fetchEmails()
     } catch (error) {
       console.error("Error authenticating:", error);
     }
   };
 
   const fetchEmails = async () => {
-    if (!isAuthenticated) return;
 
     try {
       let headers = { Authorization: `Bearer ${token}` };
 
       setInterval(async () => {
+        console.log("fetching....")
         let messagesResponse = await fetch(`${API_BASE}/messages`, { headers });
         let messagesData = await messagesResponse.json();
         let messages = messagesData["hydra:member"];
-
-        // Append new messages to the list
+        console.log(messages)
+        if(!messages)return
         setEmails((prevEmails) => {
           return [
             ...prevEmails,
@@ -71,6 +72,7 @@ useEffect(() => {
             })),
           ];
         });
+        console.log(messages)
       }, 2000);
     } catch (error) {
       console.error("Error fetching emails:", error);
@@ -80,10 +82,9 @@ useEffect(() => {
   createTempEmail();
 
   return () => {
-    // Cleanup interval when the component is unmounted
     clearInterval();
   };
-}, [isAuthenticated, token]);
+}, []);
 
 
     return (
@@ -115,7 +116,7 @@ useEffect(() => {
                     <div className="w-2/5">
                         <h2 className="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Received Emails</h2>
                         <div className="space-y-3 overflow-y-auto h-[calc(100vh-230px)] pr-2 scrollbar-thin">
-                            {receivedMails.map((mail, index) => (
+                            {emails.map((mail, index) => (
                                 <div key={index} className="p-4 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-750 transition-all duration-300 border border-gray-700 hover:border-blue-500 transform hover:-translate-y-1">
                                     <h3 className="font-medium text-blue-400">From: {mail.from}</h3>
                                     <p className="text-sm text-gray-300 truncate">Subject: {mail.subject}</p>
