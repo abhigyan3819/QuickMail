@@ -58,12 +58,6 @@ function App() {
                 let responseText = await accountResponse.text();
                 console.log("Account Creation Response:", responseText);
 
-                if (accountResponse.status !== 201) {
-                    console.error("Failed to create email:", responseText);
-                    setEmail("Failed to generate email");
-                    return;
-                }
-
                 authenticateUser(generatedMail); // ✅ Pass correct email
             } catch (err) {
                 console.error("Error creating email:", err);
