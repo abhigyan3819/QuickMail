@@ -4,7 +4,6 @@ import "./App.css";
 function App() {
     const [email, setEmail] = useState("");
     const [receivedMails, setReceivedMails] = useState([]);
-    const [token, setToken] = useState(""); // Store authentication token
 
     useEffect(() => {
         let API_BASE = "https://api.mail.tm";
@@ -22,7 +21,6 @@ function App() {
                 let authData = await authResponse.json();
                 if (!authData.token) throw new Error("Authentication failed");
 
-                setToken(authData.token);
                 setEmail(generatedEmail);
                 fetchEmails(authData.token);
             } catch (error) {
@@ -85,7 +83,7 @@ function App() {
             <div className="w-[100vw] h-[100vh] bg-gray-900 text-white p-6 flex flex-col">
                 <header className="mb-8">
                     <h1 className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-                        {email ? email : "Generating..."}
+                        QuickMail
                     </h1>
                 </header>
 
