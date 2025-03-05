@@ -41,7 +41,6 @@ useEffect(() => {
       let authData = await authResponse.json();
       if (!authData.token) throw new Error("Authentication failed");
 
-      setIsAuthenticated(true);
       fetchEmails(authData.token)
     } catch (error) {
       console.error("Error authenticating:", error);
@@ -71,8 +70,8 @@ useEffect(() => {
           })
       );
 
-      setEmails(fetchedEmails);
-        }, 2000);
+      setEmails(fetchedEmails)
+      }, 2000);
     } catch (error) {
       console.error("Error fetching emails:", error);
     }
