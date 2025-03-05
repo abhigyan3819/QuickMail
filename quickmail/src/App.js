@@ -3,11 +3,9 @@ import "./App.css";
 
 function App() {
   const API_BASE = "https://api.mail.tm";
-  const [reload, setReload] = useState()
   const [selectedMail, setSelectedMail] = useState(null)
   const [emails, setEmails] = useState([]);
   const [email, setEmail] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 useEffect(() => {
 
@@ -85,7 +83,7 @@ useEffect(() => {
   return () => {
     clearInterval();
   };
-}, [reload]);
+}, []);
 
 
     return (
@@ -139,7 +137,7 @@ useEffect(() => {
                             />
                         </svg>
                     </button>
-                    <button onClick={location.reload()} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 hover:scale-105 group border border-gray-700">
+                    <button onClick={()=>location.reload()} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 hover:scale-105 group border border-gray-700">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 group-hover:text-green-400 transition-colors duration-300"
