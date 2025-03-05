@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef} from "react";
 import "./App.css";
 
 function App() {
@@ -6,9 +6,10 @@ function App() {
   const [selectedMail, setSelectedMail] = useState(null)
   const [emails, setEmails] = useState([]);
   const [email, setEmail] = useState('');
+  const previousEmailsRef = useRef([]);
 
 useEffect(() => {
-
+  let fetchInterval
   const createTempEmail = async () => {
     try {
       let domain = "indigobook.com";
@@ -50,7 +51,7 @@ useEffect(() => {
   const fetchEmails = async (token) => {
       try {
       let headers = { Authorization: `Bearer ${token}` };
-      setInterval(async () => {
+      fetchInterval = setInterval(async () => {
         let messagesResponse = await fetch(`${API_BASE}/messages`, { headers });
         let messagesData = await messagesResponse.json();
         let messages = messagesData["hydra:member"];
@@ -69,8 +70,8 @@ useEffect(() => {
               };
           })
       );
-
-      setEmails(fetchedEmails)
+      setEmails(fetchedEmails);
+  
       }, 2000);
     } catch (error) {
       console.error("Error fetching emails:", error);
@@ -80,7 +81,7 @@ useEffect(() => {
   createTempEmail();
 
   return () => {
-    clearInterval();
+    clearInterval(fetchInterval);
   };
 }, []);
 
@@ -184,8 +185,8 @@ useEffect(() => {
                     </div>
 
                     <div className="overflow-y-auto h-[calc(100vh-280px)] pr-2 scrollbar-thin">
-                        <div className="text-gray-300 leading-relaxed">
-                            {selectedMail.content}
+                        <div className="text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: selectedMail.content }}>
+                            
                         </div>
                     </div>
                 </div>}
