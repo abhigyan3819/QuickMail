@@ -66,7 +66,7 @@ useEffect(() => {
                   subject: msgDetails.subject,
                   intro: msgDetails.intro,
                   time: msgDetails.createdAt,
-                  content: msgDetails.text || msgDetails.html || "No content available",
+                  content: msgDetails.html ? msgDetails.html : msgDetails.text ? `<pre>${msgDetails.text}</pre>` : "No content available",
               };
           })
       );
