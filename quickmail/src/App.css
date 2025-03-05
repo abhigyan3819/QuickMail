@@ -343,11 +343,17 @@ video {
     margin-left: 10px;
     margin-right: 10px;
 }
+#webcrumbs .mb-1 {
+    margin-bottom: 5px;
+}
 #webcrumbs .mb-4 {
     margin-bottom: 20px;
 }
 #webcrumbs .mb-8 {
     margin-bottom: 40px;
+}
+#webcrumbs .ml-1 {
+    margin-left: 5px;
 }
 #webcrumbs .mr-2 {
     margin-right: 10px;
@@ -557,6 +563,10 @@ video {
 #webcrumbs .text-gray-400 {
     --tw-text-opacity: 1;
     color: rgb(156 163 175 / var(--tw-text-opacity));
+}
+#webcrumbs .text-gray-500 {
+    --tw-text-opacity: 1;
+    color: rgb(107 114 128 / var(--tw-text-opacity));
 }
 #webcrumbs .text-transparent {
     color: transparent;
