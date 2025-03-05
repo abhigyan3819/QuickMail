@@ -139,7 +139,7 @@ useEffect(() => {
                             />
                         </svg>
                     </button>
-                    <button onClick={setReload(Date.now())} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 hover:scale-105 group border border-gray-700">
+                    <button onClick={location.reload()} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 hover:scale-105 group border border-gray-700">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 group-hover:text-green-400 transition-colors duration-300"
