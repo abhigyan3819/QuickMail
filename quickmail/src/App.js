@@ -70,7 +70,10 @@ useEffect(() => {
               };
           })
       );
-      setEmails(fetchedEmails);
+      if (JSON.stringify(fetchedEmails) !== JSON.stringify(previousEmailsRef.current)) {
+        setEmails(fetchedEmails);
+        previousEmailsRef.current = fetchedEmails; 
+      }
   
       }, 2000);
     } catch (error) {
