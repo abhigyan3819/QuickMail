@@ -10,9 +10,18 @@ function App() {
 
 useEffect(() => {
   let fetchInterval
+  const getDomains = async () => {
+    try {
+      let response = await fetch("https://api.mail.tm/domains");
+      let data = await response.json();
+      return(data["hydra:member"][0].domain); 
+    } catch (error) {
+      console.error("Error fetching domains:", error);
+    }
+  };
   const createTempEmail = async () => {
     try {
-      let domain = "indigobook.com";
+      let domain = await getDomains()
       let newEmail = `quickmail${Date.now()}@${domain}`;
       let password = "quickmail";
 
@@ -140,7 +149,7 @@ useEffect(() => {
                             />
                         </svg>
                     </button>
-                    <button onClick={()=>location.reload()} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 hover:scale-105 group border border-gray-700">
+                    <button onClick={()=>window.location.reload()} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 hover:scale-105 group border border-gray-700">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 group-hover:text-green-400 transition-colors duration-300"
@@ -157,6 +166,9 @@ useEffect(() => {
                         </svg>
                     </button>
                 </div>
+                <p className="text-xs text-gray-500 ml-1 mb-4">
+                  QuickMail offers secure, disposable temporary email addresses to protect your privacy, reduce spam, and ensure safe online communication. Create your temp email inbox instantly and stay anonymous online with QuickMail
+                </p>
             </div>
 
             <div className="flex gap-6 flex-1 overflow-hidden">
