@@ -3,17 +3,19 @@ import "./App.css";
 
 function App() {
   const API_BASE = "https://api.mail.tm";
-  const [email, setEmail] = useState('');
-  const [emails, setEmails] = useState([]);
+  const [reload, setReload] = useState()
   const [selectedMail, setSelectedMail] = useState(null)
+  const [emails, setEmails] = useState([]);
+  const [email, setEmail] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 useEffect(() => {
+
   const createTempEmail = async () => {
     try {
       let domain = "indigobook.com";
-      let newEmail = `tempuser${Date.now()}@${domain}`;
-      let password = "TempPass123!";
+      let newEmail = `quickmail${Date.now()}@${domain}`;
+      let password = "quickmail";
 
       let accountResponse = await fetch(`${API_BASE}/accounts`, {
         method: "POST",
@@ -55,22 +57,24 @@ useEffect(() => {
         let messagesResponse = await fetch(`${API_BASE}/messages`, { headers });
         let messagesData = await messagesResponse.json();
         let messages = messagesData["hydra:member"];
-        console.log(headers)
         if(!messages)return
-        setEmails(() => {
-          return [
-            ...messages.map((msg) => ({
-              id: msg.id,
-              from: msg.from.address,
-              subject: msg.subject,
-              intro: msg.intro,
-              time: msg.createdAt,
-              content: msg.text || msg.html || ""
-            })),
-          ];
-        });
-        console.log(messages)
-      }, 2000);
+        let fetchedEmails = await Promise.all(
+          messages.map(async (msg) => {
+              let msgDetailsResponse = await fetch(`${API_BASE}/messages/${msg.id}`, { headers });
+              let msgDetails = await msgDetailsResponse.json();
+              return {
+                  id: msg.id,
+                  from: msgDetails.from.address,
+                  subject: msgDetails.subject,
+                  intro: msgDetails.intro,
+                  time: msgDetails.createdAt,
+                  content: msgDetails.text || msgDetails.html || "No content available",
+              };
+          })
+      );
+
+      setEmails(fetchedEmails);
+        }, 2000);
     } catch (error) {
       console.error("Error fetching emails:", error);
     }
@@ -81,7 +85,7 @@ useEffect(() => {
   return () => {
     clearInterval();
   };
-}, []);
+}, [reload]);
 
 
     return (
@@ -106,7 +110,20 @@ useEffect(() => {
                             Your Temporary Email
                         </span>
                     </div>
-                    <button className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg mr-2 transition-all duration-300 hover:scale-105 group border border-gray-700">
+                    <button onClick={()=>{
+                      if (document.hasFocus()) {
+                        navigator.clipboard.writeText(email)
+                          .then(() => {
+                            console.log('Text copied to clipboard');
+                          })
+                          .catch((err) => {
+                            console.error('Failed to copy text to clipboard', err);
+                          });
+                      } else {
+                        console.error('Document is not focused');
+                      }
+                      
+                    }} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg mr-2 transition-all duration-300 hover:scale-105 group border border-gray-700">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 group-hover:text-blue-400 transition-colors duration-300"
@@ -122,7 +139,7 @@ useEffect(() => {
                             />
                         </svg>
                     </button>
-                    <button className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 hover:scale-105 group border border-gray-700">
+                    <button onClick={setReload(Date.now())} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 hover:scale-105 group border border-gray-700">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 group-hover:text-green-400 transition-colors duration-300"
