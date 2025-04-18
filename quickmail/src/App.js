@@ -22,8 +22,8 @@ useEffect(() => {
   const createTempEmail = async () => {
     try {
       let domain = await getDomains()
-      let newEmail = `quickmail${Date.now()}@${domain}`;
-      let password = "quickmail";
+      let newEmail = `zapinbox${Date.now()}@${domain}`;
+      let password = "zapinbox";
 
       let accountResponse = await fetch(`${API_BASE}/accounts`, {
         method: "POST",
@@ -103,7 +103,7 @@ useEffect(() => {
         <div className="w-[100vw] h-[100vh] bg-gray-900 text-white p-6 flex flex-col">
             <header className="mb-8">
                 <h1 className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-                    QuickMail
+                    zapinbox
                 </h1>
             </header>
 
@@ -167,7 +167,7 @@ useEffect(() => {
                     </button>
                 </div>
                 <p className="text-xs text-gray-500 ml-1 mb-4">
-                  QuickMail offers secure, disposable temporary email addresses to protect your privacy, reduce spam, and ensure safe online communication. Create your temp email inbox instantly and stay anonymous online with QuickMail
+                  zapinbox offers secure, disposable temporary email addresses to protect your privacy, reduce spam, and ensure safe online communication. Create your temp email inbox instantly and stay anonymous online with zapinbox
                 </p>
             </div>
 
